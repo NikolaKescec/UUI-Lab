@@ -1,5 +1,7 @@
 package successor;
 
+import java.util.Comparator;
+
 public class SuccState {
     private String state;
     private double cost;
@@ -24,4 +26,14 @@ public class SuccState {
     public void setCost(double cost) {
         this.cost = cost;
     }
+
+    @Override
+    public String toString() {
+        return "SuccState{" +
+                "state='" + state + '\'' +
+                ", cost=" + cost +
+                '}';
+    }
+
+    public static final Comparator<SuccState> byState = Comparator.comparing(SuccState::getState);
 }

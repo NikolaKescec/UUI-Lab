@@ -2,12 +2,15 @@ package ui;
 
 import algorithms.AlgorithmType;
 import algorithms.Algorithms;
+import algorithms.HeuristicsChecker;
 import successor.SuccState;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Supplier;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class Solution {
@@ -27,22 +30,25 @@ public class Solution {
 					case "--alg" -> {
 						if (!(i + 1 < args.length))
 							throw new IllegalArgumentException("Invalid number of arguments");
-						algorithmType = switch (args[i + 1]) {
+						i++;
+						algorithmType = switch (args[i]) {
 							case "bfs" -> AlgorithmType.BFS;
 							case "ucs" -> AlgorithmType.UCS;
 							case "astar" -> AlgorithmType.ASTAR;
-							default -> throw new IllegalArgumentException("Unsupported algorithm: " + args[i + 1]);
+							default -> throw new IllegalArgumentException("Unsupported algorithm: " + args[i]);
 						};
 					}
 					case "--ss" -> {
 						if (!(i + 1 < args.length))
 							throw new IllegalArgumentException("Invalid number of arguments");
-						stateSpace = Path.of(args[i+1]);
+						i++;
+						stateSpace = Path.of(args[i]);
 					}
 					case "--h" -> {
 						if (!(i + 1 < args.length))
 							throw new IllegalArgumentException("Invalid number of arguments");
-						heuristicsDescriptor = Path.of(args[i+1]);
+						i++;
+						heuristicsDescriptor = Path.of(args[i]);
 					}
 					case "--check-optimistic" -> {
 						checkOptimistic = true;
@@ -70,27 +76,34 @@ public class Solution {
 			
 			startingState = spaceStrings.get(0);
 			goalStates = parseGoalStates(spaceStrings.get(1));
-			transitions = prepareSuccessorStates(spaceStrings);
 
 			switch(algorithmType) {
 				case BFS -> {
+					transitions = prepareSuccessorStates(spaceStrings.subList(2, spaceStrings.size()), true);
 					System.out.println("# BFS");
-					Algorithms.algorithmBFS(startingState, transitions::get, goalStates);
+					System.out.println(Algorithms.algorithmBFS(startingState, transitions::get, goalStates));
 				}
 				case UCS -> {
+					transitions = prepareSuccessorStates(spaceStrings.subList(2, spaceStrings.size()), false);
 					System.out.println("# UCS");
-					Algorithms.algorithmUCS(startingState, transitions::get, goalStates);
+					System.out.println(Algorithms.algorithmUCS(startingState, transitions::get, goalStates));
 				}
 				case ASTAR -> {
+					transitions = prepareSuccessorStates(spaceStrings.subList(2, spaceStrings.size()), false);
 					System.out.println("# ASTAR " + heuristicsDescriptor.toString());
 					List<String> heuristicsString = Files.readAllLines(heuristicsDescriptor);
 					Map<String, Double> heuristics = parseHeuristics(heuristicsString);
-					// POZIVANJE ALGORITMA ASTAR
+					System.out.println(Algorithms.algorithmASTAR(startingState, transitions::get, goalStates, heuristics::get));
 
-					if(checkOptimistic) {}
-						// POZIVANJE ALGORITMA PROVJERE OPTIMIZMA
+					if(checkOptimistic) {
+						System.out.println("# HEURISTIC-OPTIMISTIC " + heuristicsDescriptor.toString());
+						HeuristicsChecker.checkOptimism(heuristics, transitions::get, goalStates);
+					}
 
-					if(checkConsistent) {}
+					if(checkConsistent) {
+						System.out.println("# HEURISTIC-CONSISTENT " + heuristicsDescriptor.toString());
+						HeuristicsChecker.checkConsistency(heuristics, transitions::get);
+					}
 						// POZIVANJE ALGORITMA PROVJERE KONZISTENTOSTI
 				}
 				default -> throw new IllegalArgumentException("Unknown algorithm type.");
@@ -117,15 +130,28 @@ public class Solution {
 		return new HashSet<>(Arrays.asList(goals));
 	}
 
-	private static Map<String, Set<SuccState>> prepareSuccessorStates(List<String> spaceStrings) {
+	private static Map<String, Set<SuccState>> prepareSuccessorStates(List<String> spaceStrings, boolean sorted) {
 		Map<String, Set<SuccState>> transitions = new HashMap<>();
+
+		Supplier<Set<SuccState>> supplier;
+		if(sorted) {
+			supplier = () -> new TreeSet<>(SuccState.byState);
+		} else {
+			supplier = HashSet::new;
+		}
+
 		for(String line : spaceStrings) {
 			String[] initialSplit = line.split(":");
 			String key = initialSplit[0].trim();
+			if(initialSplit.length == 1) {
+				transitions.put(key, new HashSet<>());
+				continue;
+			}
+
 			Set<SuccState> states = Arrays.stream(initialSplit[1].trim().split(" ")).map(s -> {
 				String[] pairs = s.split(",");
 				return new SuccState(pairs[0].trim(), Double.parseDouble(pairs[1].trim()));
-			}).collect(Collectors.toUnmodifiableSet());
+			}).collect(Collectors.toCollection(supplier));
 			transitions.put(key, states);
 		}
 		return transitions;

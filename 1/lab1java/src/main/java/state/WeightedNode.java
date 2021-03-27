@@ -49,8 +49,8 @@ public class WeightedNode{
             builder.append(node.getState());
             return;
         }
-        builder.append(" => ").append(node.getState());
         recursivePath(node.getParentNode(), builder);
+        builder.append(" => ").append(node.getState());
     }
 
     public static int depth(WeightedNode node) {
@@ -82,5 +82,13 @@ public class WeightedNode{
 
     public void setParentNode(WeightedNode parentNode) {
         this.parentNode = parentNode;
+    }
+
+    @Override
+    public String toString() {
+        return "WeightedNode{" +
+                "state='" + state + '\'' +
+                ", cost=" + cost +
+                '}';
     }
 }

@@ -25,4 +25,9 @@ public class HeuristicsNode extends WeightedNode{
     public void setCombinedCost(double combinedCost) {
         this.combinedCost = combinedCost;
     }
+
+    @Override
+    public String toString() {
+        return "HeuristicsNode{}";
+    }
 }
