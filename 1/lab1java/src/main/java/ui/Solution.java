@@ -6,6 +6,7 @@ import algorithms.HeuristicsChecker;
 import successor.SuccState;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -72,7 +73,7 @@ public class Solution {
 			if(algorithmType == null || (algorithmType.equals(AlgorithmType.ASTAR) && !Files.exists(heuristicsDescriptor)))
 				throw new IllegalArgumentException("Invalid path to heuristics descriptor!");
 
-			List<String> spaceStrings = Files.readAllLines(stateSpace).stream().filter(s -> !s.startsWith("#")).collect(Collectors.toList());
+			List<String> spaceStrings = Files.readAllLines(stateSpace, StandardCharsets.UTF_8).stream().filter(s -> !s.startsWith("#")).collect(Collectors.toList());
 			
 			startingState = spaceStrings.get(0);
 			goalStates = parseGoalStates(spaceStrings.get(1));
@@ -90,8 +91,8 @@ public class Solution {
 				}
 				case ASTAR -> {
 					transitions = prepareSuccessorStates(spaceStrings.subList(2, spaceStrings.size()), false);
-					System.out.println("# ASTAR " + heuristicsDescriptor.toString());
-					List<String> heuristicsString = Files.readAllLines(heuristicsDescriptor);
+					System.out.println("# A-STAR " + heuristicsDescriptor.toString());
+					List<String> heuristicsString = Files.readAllLines(heuristicsDescriptor, StandardCharsets.UTF_8);
 					Map<String, Double> heuristics = parseHeuristics(heuristicsString);
 					System.out.println(Algorithms.algorithmASTAR(startingState, transitions::get, goalStates, heuristics::get));
 
