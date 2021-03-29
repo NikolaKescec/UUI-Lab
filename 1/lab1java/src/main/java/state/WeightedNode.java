@@ -3,6 +3,9 @@ package state;
 import java.util.Comparator;
 import java.util.Objects;
 
+/**
+ * Weighted node contains a state name, total cost of this state and its parent which is also parent node.
+ */
 public class WeightedNode{
 
     private String state;
@@ -15,8 +18,14 @@ public class WeightedNode{
         this.parentNode = parentNode;
     }
 
+    /**
+     * Compares by state.
+     */
     public static final Comparator<WeightedNode> compareByState = Comparator.comparing(WeightedNode::getState);
 
+    /**
+     * Compares by cost then state.
+     */
     public static final Comparator<WeightedNode> compareByCost = Comparator.comparing(WeightedNode::getCost).thenComparing(compareByState);
 
     @Override
@@ -32,12 +41,21 @@ public class WeightedNode{
         return Objects.hash(state, cost, parentNode);
     }
 
+    /**
+     * Prints path from parent recursively.
+     * @return
+     */
     public String printPathFromParent() {
         StringBuilder pathBuilder = new StringBuilder();
         recursivePath(this, pathBuilder);
         return pathBuilder.toString();
     }
 
+    /**
+     * Builds parent path string recursively.
+     * @param node
+     * @param builder
+     */
     private void recursivePath(WeightedNode node, StringBuilder builder) {
         if(node.parentNode == null) {
             builder.append(node.getState());
@@ -47,6 +65,11 @@ public class WeightedNode{
         builder.append(" => ").append(node.getState());
     }
 
+    /**
+     * Returns the depth of this child, counting from the root.
+     * @param node
+     * @return
+     */
     public static int depth(WeightedNode node) {
         if(node.parentNode == null) {
             return 1;

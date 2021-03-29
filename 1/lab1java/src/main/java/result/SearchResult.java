@@ -2,6 +2,9 @@ package result;
 
 import state.WeightedNode;
 
+/**
+ * Class represents search result.
+ */
 public class SearchResult {
 
     private WeightedNode goal;

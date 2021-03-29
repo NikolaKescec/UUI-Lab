@@ -2,6 +2,9 @@ package state;
 
 import java.util.Comparator;
 
+/**
+ * Similar to weighted node, but with addition of combined cost (total cost + heuristic cost).
+ */
 public class HeuristicsNode extends WeightedNode{
 
     private double combinedCost;
@@ -11,6 +14,9 @@ public class HeuristicsNode extends WeightedNode{
         this.combinedCost = combinedCost;
     }
 
+    /**
+     * Compares by combined cost then by state name.
+     */
     public static final Comparator<HeuristicsNode> compareByCombinedCost = Comparator.comparing(HeuristicsNode::getCombinedCost).thenComparing(HeuristicsNode.compareByState);
 
     public double getCombinedCost() {

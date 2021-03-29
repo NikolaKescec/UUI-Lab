@@ -18,6 +18,7 @@ public class Solution {
 
 	public static void main(String ... args) {
 		// declaring variables
+
 		AlgorithmType algorithmType = null;
 		Path stateSpace = null;
 		Path heuristicsDescriptor = null;
@@ -78,6 +79,7 @@ public class Solution {
 			startingState = spaceStrings.get(0);
 			goalStates = parseGoalStates(spaceStrings.get(1));
 
+			// calling correct algorithm
 			switch(algorithmType) {
 				case BFS -> {
 					transitions = prepareSuccessorStates(spaceStrings.subList(2, spaceStrings.size()), true);
@@ -117,6 +119,11 @@ public class Solution {
 
 	}
 
+	/**
+	 * Method will parse given list of string into a map that contains the name of state and its heuristic value.
+	 * @param heuristicsString
+	 * @return heuristics map
+	 */
 	private static Map<String, Double> parseHeuristics(List<String> heuristicsString) {
 		Map<String, Double> heuristics = new HashMap<>();
 		for(String entry : heuristicsString) {
@@ -126,14 +133,26 @@ public class Solution {
 		return heuristics;
 	}
 
+	/**
+	 * Method will parse given string into a set of goal states (separated by blank space).
+	 * @param s
+	 * @return
+	 */
 	private static Set<String> parseGoalStates(String s) {
 		String[] goals = s.split(" ");
 		return new HashSet<>(Arrays.asList(goals));
 	}
 
+	/**
+	 * Method will parse given list of string into a map of state names and its successors (children)
+	 * @param spaceStrings list of children
+	 * @param sorted will create a sorted set instead of normal order
+	 * @return
+	 */
 	private static Map<String, Set<SuccState>> prepareSuccessorStates(List<String> spaceStrings, boolean sorted) {
 		Map<String, Set<SuccState>> transitions = new HashMap<>();
 
+		// decided on sorted variable
 		Supplier<Set<SuccState>> supplier;
 		if(sorted) {
 			supplier = () -> new TreeSet<>(SuccState.byState);

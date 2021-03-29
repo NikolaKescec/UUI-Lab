@@ -2,6 +2,9 @@ package successor;
 
 import java.util.Comparator;
 
+/**
+ * Successor state models every successor state from some state. Contains successor state name and cost to it.
+ */
 public class SuccState {
     private String state;
     private double cost;

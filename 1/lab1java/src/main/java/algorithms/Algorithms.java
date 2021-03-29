@@ -10,6 +10,13 @@ import java.util.function.Function;
 
 public class Algorithms {
 
+    /**
+     * Method will traverse the search tree and try to find the goal state using BFS algorithm.
+     * @param startingState
+     * @param succ
+     * @param goalStates
+     * @return
+     */
     public static SearchResult algorithmBFS(String startingState, Function<String, Set<SuccState>> succ, Set<String> goalStates) {
         Set<String> visited = new HashSet<>();
         LinkedList<WeightedNode> open = new LinkedList<>();
@@ -32,6 +39,13 @@ public class Algorithms {
         return new SearchResult(false, visited.size());
     }
 
+    /**
+     * Method will traverse the search tree and try to find the goal state using UCS algorithm.
+     * @param startingState
+     * @param succ
+     * @param goalStates
+     * @return
+     */
     public static SearchResult algorithmUCS(String startingState, Function<String, Set<SuccState>> succ, Set<String> goalStates) {
         Set<String> visited = new HashSet<>();
         Queue<WeightedNode> open = new PriorityQueue<>(WeightedNode.compareByCost);
@@ -66,6 +80,13 @@ public class Algorithms {
         return new SearchResult(false, visited.size());
     }
 
+    /**
+     * Method will traverse the search tree and try to find the goal state using ASTAR algorithm.
+     * @param startingState
+     * @param succ
+     * @param goalStates
+     * @return
+     */
     public static SearchResult algorithmASTAR(String startingState, Function<String, Set<SuccState>> succ, Set<String> goalStates, Function<String, Double> heuristics) {
         Set<String> visited = new HashSet<>();
         Queue<HeuristicsNode> open = new PriorityQueue<>(HeuristicsNode.compareByCombinedCost);

@@ -12,6 +12,12 @@ import java.util.stream.Collectors;
 
 public class HeuristicsChecker {
 
+    /**
+     * Method will check optimism of given heuristics by calling UCS for every state and checking the optimism condition..
+     * @param heuristicsValues
+     * @param succ
+     * @param goalStates
+     */
     public static void checkOptimism(Map<String, Double> heuristicsValues, Function<String, Set<SuccState>> succ, Set<String> goalStates) {
         boolean optimism = true;
         for(Map.Entry<String, Double> heuristicValue : heuristicsValues.entrySet().stream().sorted(Map.Entry.comparingByKey()).collect(Collectors.toList())) {
@@ -32,10 +38,23 @@ public class HeuristicsChecker {
         System.out.println("[CONCLUSION]: Heuristic is " + (optimism ? "" : "not ") + "optimistic.");
     }
 
+    /**
+     * Optimism result string builder method.
+     * @param heuristicOptimisticString
+     * @param error
+     * @param key
+     * @param value
+     * @param realCost
+     */
     private static void addToOptimisticBuilder(StringBuilder heuristicOptimisticString, boolean error, String key, Double value, double realCost) {
         heuristicOptimisticString.append(error ? "[ERR] " : "[OK]").append(" h(").append(key).append(") <= h*: ").append(value).append(" <= ").append(realCost);
     }
 
+    /**
+     * Method will check consistency based on consistency condition.
+     * @param heuristicsValues
+     * @param succ
+     */
     public static void checkConsistency(Map<String, Double> heuristicsValues, Function<String, Set<SuccState>> succ) {
         boolean consistency = true;
         for(Map.Entry<String, Double> heuristicValue : heuristicsValues.entrySet().stream().sorted(Map.Entry.comparingByKey()).collect(Collectors.toList())) {
@@ -56,6 +75,16 @@ public class HeuristicsChecker {
         System.out.println("[CONCLUSION]: Heuristic is " + (consistency ? "" : "not ") + "consistent.");
     }
 
+    /**
+     * Consistency string builder.
+     * @param builder
+     * @param b
+     * @param key
+     * @param state
+     * @param value
+     * @param futureValue
+     * @param cost
+     */
     private static void addToConsistencyBuilder(StringBuilder builder, boolean b, String key, String state, Double value, double futureValue, double cost) {
         builder.append(b ? "[ERR]" : "[OK]").append(" h(").append(key).append(") <= h(").append(state).append(") + c: ")
                 .append(value)
