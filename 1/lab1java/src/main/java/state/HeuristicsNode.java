@@ -11,12 +11,7 @@ public class HeuristicsNode extends WeightedNode{
         this.combinedCost = combinedCost;
     }
 
-    public static final Comparator<HeuristicsNode> compareByCombinedCost = (hs1, hs2) -> {
-        int result = Double.compare(hs1.getCombinedCost(), hs2.getCombinedCost());
-        if(result == 0)
-            return HeuristicsNode.compareByState.compare(hs1, hs2);
-        return result;
-    };
+    public static final Comparator<HeuristicsNode> compareByCombinedCost = Comparator.comparing(HeuristicsNode::getCombinedCost).thenComparing(HeuristicsNode.compareByState);
 
     public double getCombinedCost() {
         return combinedCost;

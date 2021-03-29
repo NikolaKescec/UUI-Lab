@@ -14,24 +14,19 @@ public class Algorithms {
         Set<String> visited = new HashSet<>();
         LinkedList<WeightedNode> open = new LinkedList<>();
         open.add(new WeightedNode(startingState, 0, null));
+        int visitedStatesNumber = 0;
         while(!open.isEmpty()) {
             WeightedNode state = open.remove();
-            visited.add(state.getState());
+            visitedStatesNumber++;
             if(goalStates.contains(state.getState())) {
-                return new SearchResult(true, state, visited.size(), WeightedNode.depth(state), state.getCost());
+                return new SearchResult(true, state, visitedStatesNumber, WeightedNode.depth(state), state.getCost());
             }
-            for(SuccState successor : succ.apply(state.getState())) {
-                boolean inOpen = false;
+            visited.add(state.getState());
+            List<SuccState> successors = new ArrayList<>(succ.apply(state.getState()));
+            for(SuccState successor : successors) {
                 if(visited.contains(successor.getState()))
                     continue;
-                for (WeightedNode currentNode : open) {
-                    if (successor.getState().equals(currentNode.getState())) {
-                        inOpen = true;
-                        break;
-                    }
-                }
-                if(!inOpen)
-                    open.addLast(new WeightedNode(successor.getState(), state.getCost() + successor.getCost(), state));
+                open.addLast(new WeightedNode(successor.getState(), state.getCost() + successor.getCost(), state));
             }
         }
         return new SearchResult(false, visited.size());
@@ -41,12 +36,14 @@ public class Algorithms {
         Set<String> visited = new HashSet<>();
         Queue<WeightedNode> open = new PriorityQueue<>(WeightedNode.compareByCost);
         open.add(new WeightedNode(startingState, 0, null));
+        int visitedStatesNumber = 0;
         while(!open.isEmpty()) {
             WeightedNode state = open.remove();
-            visited.add(state.getState());
+            visitedStatesNumber++;
             if(goalStates.contains(state.getState())) {
-                return new SearchResult(true, state, visited.size(), WeightedNode.depth(state), state.getCost());
+                return new SearchResult(true, state, visitedStatesNumber, WeightedNode.depth(state), state.getCost());
             }
+            visited.add(state.getState());
             for(SuccState successor : succ.apply(state.getState())) {
                 boolean successorCheaper = true;
                 if(visited.contains(successor.getState()))
@@ -73,12 +70,14 @@ public class Algorithms {
         Set<String> visited = new HashSet<>();
         Queue<HeuristicsNode> open = new PriorityQueue<>(HeuristicsNode.compareByCombinedCost);
         open.add(new HeuristicsNode(startingState, 0, null, 0));
+        int visitedStatesNumber = 0;
         while(!open.isEmpty()) {
             HeuristicsNode state = open.remove();
-            visited.add(state.getState());
+            visitedStatesNumber++;
             if(goalStates.contains(state.getState())) {
-                return new SearchResult(true, state, visited.size(), WeightedNode.depth(state), state.getCost());
+                return new SearchResult(true, state, visitedStatesNumber, WeightedNode.depth(state), state.getCost());
             }
+            visited.add(state.getState());
             for(SuccState successor : succ.apply(state.getState())) {
                 boolean successorCheaper = true;
                 if(visited.contains(successor.getState()))

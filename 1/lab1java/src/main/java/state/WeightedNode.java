@@ -17,13 +17,7 @@ public class WeightedNode{
 
     public static final Comparator<WeightedNode> compareByState = Comparator.comparing(WeightedNode::getState);
 
-    public static final Comparator<WeightedNode> compareByCost = (ws1, ws2) -> {
-        int result = Double.compare(ws1.getCost(), ws2.getCost());
-        if(result == 0) {
-            return compareByState.compare(ws1, ws2);
-        }
-        return result;
-    };
+    public static final Comparator<WeightedNode> compareByCost = Comparator.comparing(WeightedNode::getCost).thenComparing(compareByState);
 
     @Override
     public boolean equals(Object o) {
