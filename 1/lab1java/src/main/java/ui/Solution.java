@@ -29,41 +29,49 @@ public class Solution {
 			// arguments parsing
 			for(int i = 0; i < args.length; i++) {
 				switch (args[i]){
-					case "--alg" -> {
+					case "--alg" :
 						if (!(i + 1 < args.length))
 							throw new IllegalArgumentException("Invalid number of arguments");
 						i++;
-						algorithmType = switch (args[i]) {
-							case "bfs" -> AlgorithmType.BFS;
-							case "ucs" -> AlgorithmType.UCS;
-							case "astar" -> AlgorithmType.ASTAR;
-							default -> throw new IllegalArgumentException("Unsupported algorithm: " + args[i]);
+						switch (args[i]) {
+							case "bfs" :
+								algorithmType = AlgorithmType.BFS;
+								break;
+							case "ucs" :
+								algorithmType= AlgorithmType.UCS;
+								break;
+							case "astar" :
+								algorithmType = AlgorithmType.ASTAR;
+								break;
+							default : throw new IllegalArgumentException("Unsupported algorithm: " + args[i]);
 						};
-					}
-					case "--ss" -> {
+						break;
+					case "--ss" :
 						if (!(i + 1 < args.length))
 							throw new IllegalArgumentException("Invalid number of arguments");
 						i++;
 						stateSpace = Path.of(args[i]);
-					}
-					case "--h" -> {
+						break;
+					case "--h" :
 						if (!(i + 1 < args.length))
 							throw new IllegalArgumentException("Invalid number of arguments");
 						i++;
 						heuristicsDescriptor = Path.of(args[i]);
-					}
-					case "--check-optimistic" -> {
+						break;
+					case "--check-optimistic" :
 						checkOptimistic = true;
-					}
-					case "--check-consistent" -> {
+						break;
+					case "--check-consistent" :
 						checkConsistent = true;
-					}
-					default -> throw new IllegalArgumentException("Unknown parameter: " + args[i]);
+						break;
+					default : throw new IllegalArgumentException("Unknown parameter: " + args[i]);
 				}
 			}
 
 			// further initialization
 			Map<String, Set<SuccState>> transitions;
+			Map<String, Double> heuristics = null;
+			List<String> heuristicsString;
 			String startingState;
 			Set<String> goalStates;
 
@@ -71,46 +79,59 @@ public class Solution {
 			if(stateSpace == null || !Files.exists(stateSpace))
 				throw new IllegalArgumentException("Invalid path to state space!");
 
-			if(algorithmType == null || (algorithmType.equals(AlgorithmType.ASTAR) && !Files.exists(heuristicsDescriptor)))
+			if(heuristicsDescriptor != null && !Files.exists(heuristicsDescriptor))
 				throw new IllegalArgumentException("Invalid path to heuristics descriptor!");
 
+			// PARSING STATES GIVEN IN STATE SPACE
 			List<String> spaceStrings = Files.readAllLines(stateSpace, StandardCharsets.UTF_8).stream().filter(s -> !s.startsWith("#")).collect(Collectors.toList());
-			
 			startingState = spaceStrings.get(0);
 			goalStates = parseGoalStates(spaceStrings.get(1));
+			transitions = prepareSuccessorStates(spaceStrings.subList(2, spaceStrings.size()), algorithmType != null && algorithmType.equals(AlgorithmType.BFS));
+
+			// IF HEURISTICS DESCRIPTOR IS GIVEN AND IS VALID PARSE HEURISTICS
+			if(heuristicsDescriptor != null) {
+				heuristicsString = Files.readAllLines(heuristicsDescriptor, StandardCharsets.UTF_8);
+				heuristics = parseHeuristics(heuristicsString);
+			}
 
 			// calling correct algorithm
-			switch(algorithmType) {
-				case BFS -> {
-					transitions = prepareSuccessorStates(spaceStrings.subList(2, spaceStrings.size()), true);
-					System.out.println("# BFS");
-					System.out.println(Algorithms.algorithmBFS(startingState, transitions::get, goalStates));
-				}
-				case UCS -> {
-					transitions = prepareSuccessorStates(spaceStrings.subList(2, spaceStrings.size()), false);
-					System.out.println("# UCS");
-					System.out.println(Algorithms.algorithmUCS(startingState, transitions::get, goalStates));
-				}
-				case ASTAR -> {
-					transitions = prepareSuccessorStates(spaceStrings.subList(2, spaceStrings.size()), false);
-					System.out.println("# A-STAR " + heuristicsDescriptor.toString());
-					List<String> heuristicsString = Files.readAllLines(heuristicsDescriptor, StandardCharsets.UTF_8);
-					Map<String, Double> heuristics = parseHeuristics(heuristicsString);
-					System.out.println(Algorithms.algorithmASTAR(startingState, transitions::get, goalStates, heuristics::get));
+			if(algorithmType != null) {
+				switch (algorithmType) {
+					case BFS:
+						System.out.println("# BFS");
+						System.out.println(Algorithms.algorithmBFS(startingState, transitions::get, goalStates));
+						break;
+					case UCS:
+						System.out.println("# UCS");
+						System.out.println(Algorithms.algorithmUCS(startingState, transitions::get, goalStates));
+						break;
+					case ASTAR:
+						if(heuristicsDescriptor == null)
+							throw new IllegalArgumentException("No heuristics given!");
+						System.out.println("# A-STAR " + heuristicsDescriptor.toString());
 
-					if(checkOptimistic) {
-						System.out.println("# HEURISTIC-OPTIMISTIC " + heuristicsDescriptor.toString());
-						HeuristicsChecker.checkOptimism(heuristics, transitions::get, goalStates);
-					}
-
-					if(checkConsistent) {
-						System.out.println("# HEURISTIC-CONSISTENT " + heuristicsDescriptor.toString());
-						HeuristicsChecker.checkConsistency(heuristics, transitions::get);
-					}
-						// POZIVANJE ALGORITMA PROVJERE KONZISTENTOSTI
+						System.out.println(Algorithms.algorithmASTAR(startingState, transitions::get, goalStates, heuristics::get));
+						break;
+					default:
+						throw new IllegalArgumentException("Unknown algorithm type.");
 				}
-				default -> throw new IllegalArgumentException("Unknown algorithm type.");
 			}
+
+			// CALLING HEURISTICS CHECKING ALGHORITMS
+			if(checkOptimistic) {
+				if(heuristics == null)
+					throw new IllegalArgumentException("Heuristics not initialized!");
+				System.out.println("# HEURISTIC-OPTIMISTIC " + heuristicsDescriptor.toString());
+				HeuristicsChecker.checkOptimism(heuristics, transitions::get, goalStates);
+			}
+
+			if(checkConsistent) {
+				if(heuristics == null)
+					throw new IllegalArgumentException("Heuristics not initialized!");
+				System.out.println("# HEURISTIC-CONSISTENT " + heuristicsDescriptor.toString());
+				HeuristicsChecker.checkConsistency(heuristics, transitions::get);
+			}
+
 		} catch (IOException e) {
 			System.out.println("Unsuccessful reading of " + stateSpace.toString());
 		} catch (IllegalArgumentException e) {

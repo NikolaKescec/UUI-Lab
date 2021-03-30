@@ -21,25 +21,12 @@ public class WeightedNode{
     /**
      * Compares by state.
      */
-    public static final Comparator<WeightedNode> compareByState = Comparator.comparing(WeightedNode::getState);
+    public static final Comparator<WeightedNode> COMPARE_BY_STATE = Comparator.comparing(WeightedNode::getState);
 
     /**
      * Compares by cost then state.
      */
-    public static final Comparator<WeightedNode> compareByCost = Comparator.comparing(WeightedNode::getCost).thenComparing(compareByState);
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        WeightedNode that = (WeightedNode) o;
-        return cost == that.cost && Objects.equals(state, that.state) && Objects.equals(parentNode, that.parentNode);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(state, cost, parentNode);
-    }
+    public static final Comparator<WeightedNode> COMPARE_BY_COST = Comparator.comparingDouble(WeightedNode::getCost);
 
     /**
      * Prints path from parent recursively.
@@ -107,5 +94,18 @@ public class WeightedNode{
                 "state='" + state + '\'' +
                 ", cost=" + cost +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        WeightedNode that = (WeightedNode) o;
+        return Double.compare(that.cost, cost) == 0 && Objects.equals(state, that.state) && Objects.equals(parentNode, that.parentNode);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(state, cost, parentNode);
     }
 }
