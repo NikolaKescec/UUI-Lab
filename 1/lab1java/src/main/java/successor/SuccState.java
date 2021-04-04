@@ -38,5 +38,8 @@ public class SuccState {
                 '}';
     }
 
+    /**
+     * Comparator that compares by state name.
+     */
     public static final Comparator<SuccState> byState = Comparator.comparing(SuccState::getState);
 }

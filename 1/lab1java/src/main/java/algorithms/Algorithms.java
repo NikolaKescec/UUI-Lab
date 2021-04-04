@@ -8,14 +8,17 @@ import successor.SuccState;
 import java.util.*;
 import java.util.function.Function;
 
+/**
+ * Class contains concrete algorithm implementations: BFS, UCS, A-STAR
+ */
 public class Algorithms {
 
     /**
      * Method will traverse the search tree and try to find the goal state using BFS algorithm.
-     * @param startingState
-     * @param succ
-     * @param goalStates
-     * @return
+     * @param startingState state from which the search starts
+     * @param succ function that, given state name will return successors for that state
+     * @param goalStates states in which search ends
+     * @return Search result which can be positive, meaning the path to goal state has been found or negative
      */
     public static SearchResult algorithmBFS(String startingState, Function<String, Set<SuccState>> succ, Set<String> goalStates) {
         Set<String> visited = new HashSet<>();
@@ -36,6 +39,8 @@ public class Algorithms {
             for(SuccState successor : successors) {
                 if(visited.contains(successor.getState()))
                     continue;
+
+                // check if this current tree node is already in open, if it is then don't add it in
                 if(!currentlyInOpen.contains(successor.getState())) {
                     open.addLast(new WeightedNode(successor.getState(), state.getCost() + successor.getCost(), state));
                     currentlyInOpen.add(successor.getState());
@@ -47,10 +52,10 @@ public class Algorithms {
 
     /**
      * Method will traverse the search tree and try to find the goal state using UCS algorithm.
-     * @param startingState
-     * @param succ
-     * @param goalStates
-     * @return
+     * @param startingState state from which the search starts
+     * @param succ function that, given state name will return successors for that state
+     * @param goalStates states in which search ends
+     * @return Search result which can be positive, meaning the path to goal state has been found or negative
      */
     public static SearchResult algorithmUCS(String startingState, Function<String, Set<SuccState>> succ, Set<String> goalStates) {
         Set<String> visited = new HashSet<>();
@@ -75,6 +80,7 @@ public class Algorithms {
                 if(visited.contains(successor.getState()))
                     continue;
 
+                // check if this current tree node is already in open, if it is only then iterate trough open list
                 if(currentlyInOpen.contains(successor.getState())) {
                     Iterator<WeightedNode> iterator = open.iterator();
                     while(iterator.hasNext()) {
@@ -99,10 +105,11 @@ public class Algorithms {
 
     /**
      * Method will traverse the search tree and try to find the goal state using ASTAR algorithm.
-     * @param startingState
-     * @param succ
-     * @param goalStates
-     * @return
+     * @param startingState state from which the search starts
+     * @param succ function that, given state name will return successors for that state
+     * @param goalStates states in which search ends
+     * @param heuristics function that, given a state name will return its heuristics value bound to it
+     * @return Search result which can be positive, meaning the path to goal state has been found or negative
      */
     public static SearchResult algorithmASTAR(String startingState, Function<String, Set<SuccState>> succ, Set<String> goalStates, Function<String, Double> heuristics) {
         Set<String> visited = new HashSet<>();
@@ -126,6 +133,7 @@ public class Algorithms {
                 if(visited.contains(successor.getState()))
                     continue;
 
+                // check if this current tree node is already in open, if it is only then iterate trough open list
                 if(currentlyInOpen.contains(successor.getState())) {
                     Iterator<HeuristicsNode> iterator = open.iterator();
                     while(iterator.hasNext()) {

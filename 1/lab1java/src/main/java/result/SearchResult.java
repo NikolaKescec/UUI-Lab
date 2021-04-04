@@ -3,7 +3,8 @@ package result;
 import state.WeightedNode;
 
 /**
- * Class represents search result.
+ * Class represents search result. Consists of  goal state, boolean flag that describes if solution has been found,
+ * number of visited states, path length and total path cost.
  */
 public class SearchResult {
 
