@@ -1,10 +1,11 @@
 package structures;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Clausula {
 
-    private static int totalNumberOfClausula = 1;
+    private static int totalNumberOfClausula = 0;
 
     private List<String> literals;
     private String clausula;
@@ -17,7 +18,7 @@ public class Clausula {
 
     public Clausula(String clausula, int clausulaNumber) {
         this.clausula = clausula.toLowerCase(Locale.ROOT);
-        literals = Arrays.asList(this.clausula.split(" v "));
+        literals = new ArrayList<>(Arrays.asList(this.clausula.split(" v ")));
         this.clausulaNumber = clausulaNumber;
         this.resolved=false;
     }
@@ -40,7 +41,7 @@ public class Clausula {
 
     public void setClausula(String clausula) {
         this.clausula = clausula.toLowerCase(Locale.ROOT);
-        literals = Arrays.asList(this.clausula.split(" v "));
+        literals = new ArrayList<>(Arrays.asList(this.clausula.split(" v ")));
     }
 
     public static LinkedHashSet<Clausula> negateClausula(String clausula) {
@@ -48,14 +49,14 @@ public class Clausula {
         clausula = clausula.toLowerCase(Locale.ROOT);
         if(clausula.length() == 0)
             throw new IllegalArgumentException("Clausula can not be empty!");
-        String[] literals = clausula.split(" V ");
+        String[] literals = clausula.split(" v ");
         for (String literal : literals) {
+            Clausula.incrementTotalNumberOfClausula();
             if(literal.startsWith("~")){
                 negatedClausulas.add(new Clausula(literal.substring(1),  Clausula.totalNumberOfClausula));
                 continue;
             }
             literal = "~" + literal;
-            Clausula.incrementTotalNumberOfClausula();
             negatedClausulas.add(new Clausula(literal, Clausula.totalNumberOfClausula));
         }
         return negatedClausulas;
@@ -71,6 +72,18 @@ public class Clausula {
 
     public static void decrementTotalNumberOfClausula() {
         totalNumberOfClausula--;
+    }
+
+    public static void resetClausulaNumber(int number) {
+        totalNumberOfClausula = number;
+    }
+
+    public static void fixNumbers(LinkedHashSet<Clausula> clausulas) {
+        int i = 1;
+        for(Clausula clausula : clausulas) {
+            clausula.setClausulaNumber(i);
+            i++;
+        }
     }
 
     @Override

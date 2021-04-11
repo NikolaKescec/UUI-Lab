@@ -28,6 +28,6 @@ public class Result {
 
     @Override
     public String toString() {
-        return "===============\n[CONCLUSION]: " + originalClausula + "is " + (conclusion ? "true" : "unknown");
+        return "===============\n[CONCLUSION]: " + originalClausula + " is " + (conclusion ? "true" : "unknown");
     }
 }

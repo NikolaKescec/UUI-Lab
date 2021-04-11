@@ -15,19 +15,17 @@ public class StrategyAlgorihtms {
             return;
 
         Iterator<Clausula> iterator = clausulaSet.iterator();
-        int replaceNumber = 0;
         while(iterator.hasNext()){
             Clausula current = iterator.next();
             if(subSet(current.getLiterals(), newClausula)){
-                replaceNumber = current.getClausulaNumber();
+                Clausula.incrementTotalNumberOfClausula();
                 iterator.remove();
-                clausulaSet.add(new Clausula(newClausula, replaceNumber));
+                clausulaSet.add(new Clausula(newClausula,  Clausula.getTotalNumberOfClausula()));
                 return;
             }
         }
-        int additionNumber = Clausula.getTotalNumberOfClausula();
-        clausulaSet.add(new Clausula(newClausula, additionNumber));
         Clausula.incrementTotalNumberOfClausula();
+        clausulaSet.add(new Clausula(newClausula, Clausula.getTotalNumberOfClausula()));
     }
 
     private static boolean subSet(List<String> literals, String newClausula) {
