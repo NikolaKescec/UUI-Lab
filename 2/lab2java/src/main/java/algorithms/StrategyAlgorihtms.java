@@ -7,25 +7,21 @@ import java.util.stream.Collectors;
 
 public class StrategyAlgorihtms {
 
-    public static void addToClausulaSet(String newClausula, Set<Clausula> clausulaSet) {
+    public static boolean addToClausulaSet(String newClausula, Set<Clausula> clausulaSet) {
 
         newClausula = newClausula.toLowerCase(Locale.ROOT);
         newClausula = factorize(newClausula);
         if(unimportance(newClausula))
-            return;
+            return false;
 
-        Iterator<Clausula> iterator = clausulaSet.iterator();
-        while(iterator.hasNext()){
-            Clausula current = iterator.next();
-            if(subSet(current.getLiterals(), newClausula)){
-                Clausula.incrementTotalNumberOfClausula();
-                iterator.remove();
-                clausulaSet.add(new Clausula(newClausula,  Clausula.getTotalNumberOfClausula()));
-                return;
-            }
-        }
+        removeAlreadyContained(newClausula, clausulaSet);
         Clausula.incrementTotalNumberOfClausula();
         clausulaSet.add(new Clausula(newClausula, Clausula.getTotalNumberOfClausula()));
+        return true;
+    }
+
+    public static void removeAlreadyContained(String clausula, Set<Clausula> clausulaSet) {
+        clausulaSet.removeIf(current -> subSet(current.getLiterals(), clausula));
     }
 
     private static boolean subSet(List<String> literals, String newClausula) {

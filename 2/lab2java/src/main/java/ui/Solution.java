@@ -113,6 +113,8 @@ public class Solution {
 			String clausula = clausulaStringList.get(i);
 			StrategyAlgorihtms.addToClausulaSet(clausula, clausulas);
 		}
+		Clausula.resetClausulaNumber(clausulas.size());
+		Clausula.fixNumbers(clausulas);
 		return clausulas;
 	}
 

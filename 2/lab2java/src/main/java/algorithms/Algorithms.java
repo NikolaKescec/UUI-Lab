@@ -27,9 +27,13 @@ public class Algorithms {
             }
 
             if(!resolvent.isEmpty()) {
-                System.out.println(Clausula.getTotalNumberOfClausula() + 1 + ". " + resolvent + " (" + pair.getFirstClausula().getClausulaNumber() + ", " + pair.getSecondClausula().getClausulaNumber() + ")");
-                StrategyAlgorihtms.addToClausulaSet(resolvent, sos);
-                combinedSet.addAll(sos);
+                if(StrategyAlgorihtms.addToClausulaSet(resolvent, sos)) {
+                    System.out.println(Clausula.getTotalNumberOfClausula() + ". " + resolvent + " (" + pair.getFirstClausula().getClausulaNumber() + ", " + pair.getSecondClausula().getClausulaNumber() + ")");
+                    for(Clausula clausula : sos) {
+                        StrategyAlgorihtms.removeAlreadyContained(clausula.getClausula(), combinedSet);
+                        combinedSet.add(clausula);
+                    }
+                }
             }
         }
         return new Result(false, originalClausula.getClausula());
