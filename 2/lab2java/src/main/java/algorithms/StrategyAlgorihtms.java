@@ -1,13 +1,14 @@
 package algorithms;
 
 import structures.Clausula;
+import structures.ClausulaPair;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class StrategyAlgorihtms {
 
-    public static boolean addToClausulaSet(String newClausula, Set<Clausula> clausulaSet) {
+    public static boolean addToClausulaSet(String newClausula, Set<Clausula> clausulaSet, ClausulaPair pair) {
 
         newClausula = newClausula.toLowerCase(Locale.ROOT);
         newClausula = factorize(newClausula);
@@ -15,8 +16,7 @@ public class StrategyAlgorihtms {
             return false;
 
         removeAlreadyContained(newClausula, clausulaSet);
-        Clausula.incrementTotalNumberOfClausula();
-        clausulaSet.add(new Clausula(newClausula, Clausula.getTotalNumberOfClausula()));
+        clausulaSet.add(new Clausula(newClausula, pair));
         return true;
     }
 

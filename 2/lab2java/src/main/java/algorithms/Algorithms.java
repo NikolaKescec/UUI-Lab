@@ -10,25 +10,24 @@ import java.util.*;
 public class Algorithms {
 
     public static Result resolutionAlgorithm(LinkedHashSet<Clausula> negatedProveClausulas,  LinkedHashSet<Clausula> clausulaList, Clausula originalClausula){
+        Clausula.resetStartingNumber();
         printClausulas(clausulaList);
         LinkedHashSet<Clausula> sos = new LinkedHashSet<>(negatedProveClausulas);
         LinkedHashSet<Clausula> combinedSet = new LinkedHashSet<>(clausulaList);
         HashMap<String, Set<String>> resolvedMaps = new HashMap<>();
         combinedSet.addAll(sos);
         printClausulas(sos);
-        System.out.println("===============");
+        System.out.print("===============\n");
         ClausulaPair pair;
         while((pair = selectClauses(combinedSet, sos, resolvedMaps)) != null) {
             String resolvent = resolve(pair.getFirstClausula(), pair.getSecondClausula());
 
             if (resolvent.equals("NIL")) {
-                System.out.println(Clausula.getTotalNumberOfClausula() + 1 + ". NIL (" + pair.getFirstClausula().getClausulaNumber() + ", " + pair.getSecondClausula().getClausulaNumber() + ")");
-                return new Result(true, originalClausula.getClausula());
+                return new Result(true, originalClausula.getClausula(), new Clausula(resolvent, pair), sos);
             }
 
             if(!resolvent.isEmpty()) {
-                if(StrategyAlgorihtms.addToClausulaSet(resolvent, sos)) {
-                    System.out.println(Clausula.getTotalNumberOfClausula() + ". " + resolvent + " (" + pair.getFirstClausula().getClausulaNumber() + ", " + pair.getSecondClausula().getClausulaNumber() + ")");
+                if(StrategyAlgorihtms.addToClausulaSet(resolvent, sos, pair)) {
                     for(Clausula clausula : sos) {
                         StrategyAlgorihtms.removeAlreadyContained(clausula.getClausula(), combinedSet);
                         combinedSet.add(clausula);
@@ -36,7 +35,7 @@ public class Algorithms {
                 }
             }
         }
-        return new Result(false, originalClausula.getClausula());
+        return new Result(false, originalClausula.getClausula(), null, null);
     }
 
 
@@ -106,22 +105,18 @@ public class Algorithms {
             switch (command.getType()){
                 case TEST:
                     System.out.println("User's command: " + command);
-                    Clausula.resetClausulaNumber(clausulaSet.size());
                     System.out.println(resolutionAlgorithm(Clausula.negateClausula(command.getClausula().getClausula()), clausulaSet, command.getClausula()));
                     System.out.println();
                     break;
                 case ADD:
                     System.out.println("User's command: " + command);
-                    Clausula.resetClausulaNumber(clausulaSet.size());
-                    StrategyAlgorihtms.addToClausulaSet(command.getClausula().toString(), clausulaSet);
+                    StrategyAlgorihtms.addToClausulaSet(command.getClausula().toString(), clausulaSet, null);
                     System.out.println("Added " + command.getClausula().toString());
                     System.out.println();
                     break;
                 case REMOVE:
                     System.out.println("User's command: " + command);
                     clausulaSet.remove(command.getClausula());
-                    Clausula.resetClausulaNumber(clausulaSet.size());
-                    Clausula.fixNumbers(clausulaSet);
                     System.out.println("Removed " + command.getClausula().toString());
                     System.out.println();
                     break;
@@ -132,7 +127,10 @@ public class Algorithms {
     }
 
     public static void printClausulas(LinkedHashSet<Clausula> clausulas) {
-        for(Clausula clausula : clausulas)
-            System.out.println(clausula.getClausulaNumber() + "." + " " + clausula.getClausula());
+        for(Clausula clausula : clausulas) {
+            System.out.print(Clausula.getStartingClausulaNumber() + "." + " " + clausula.getClausula() + "\n");
+            clausula.setClausulaNumber(Clausula.getStartingClausulaNumber());
+            Clausula.incrementStartingNumber();
+        }
     }
 }

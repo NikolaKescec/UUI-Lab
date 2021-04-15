@@ -111,10 +111,8 @@ public class Solution {
 		int size = complete ? clausulaStringList.size() : clausulaStringList.size()-1;
 		for(int i = 0; i < size; i++) {
 			String clausula = clausulaStringList.get(i);
-			StrategyAlgorihtms.addToClausulaSet(clausula, clausulas);
+			StrategyAlgorihtms.addToClausulaSet(clausula, clausulas, null);
 		}
-		Clausula.resetClausulaNumber(clausulas.size());
-		Clausula.fixNumbers(clausulas);
 		return clausulas;
 	}
 
