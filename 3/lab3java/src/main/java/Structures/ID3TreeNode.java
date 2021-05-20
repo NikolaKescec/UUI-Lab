@@ -1,20 +1,32 @@
 package Structures;
 
+import java.util.List;
 import java.util.Map;
 
 public class ID3TreeNode {
 
+    /**Attribute for tree node**/
     private String attribute;
+    /**Concrete value for leaf**/
     private String nodeValue;
+    /**Node children, map maps attribute values to concrete nodes**/
     private Map<String, ID3TreeNode> nodes;
+    /** List of remembered values for that attribute**/
+    private String mostCommonValue;
 
     public ID3TreeNode() {
     }
 
     public ID3TreeNode(String attribute, String value, Map<String, ID3TreeNode> nodes) {
+        if(attribute != null && value != null) throw new IllegalArgumentException("A three node can not be a knot and leaf at the same time!");
         this.attribute = attribute;
         this.nodes = nodes;
         this.nodeValue = value;
+    }
+
+    public ID3TreeNode(String attribute, String value, Map<String, ID3TreeNode> nodes, String mostCommonValue) {
+        this(attribute, value, nodes);
+        this.mostCommonValue = mostCommonValue;
     }
 
     public String getAttribute() {
@@ -33,13 +45,37 @@ public class ID3TreeNode {
         this.nodes = nodes;
     }
 
-    public static String printTree(ID3TreeNode tree) {
-        System.out.println("[BRANCHES]:");
-        StringBuilder stringBuilder = new StringBuilder();
-        printRecursive(tree, "", 0);
-        return stringBuilder.toString();
+    public String getNodeValue() {
+        return nodeValue;
     }
 
+    public void setNodeValue(String nodeValue) {
+        this.nodeValue = nodeValue;
+    }
+
+    public String getMostCommonValue() {
+        return mostCommonValue;
+    }
+
+    public void setMostCommonValue(String mostCommonValue) {
+        this.mostCommonValue = mostCommonValue;
+    }
+
+    /**
+     * Method will print out given tree.
+     * @param tree
+     */
+    public static void printTree(ID3TreeNode tree) {
+        System.out.print("[BRANCHES]:\n");
+        printRecursive(tree, "", 0);
+    }
+
+    /**
+     * Recursively prints nodes of this tree.
+     * @param tree
+     * @param base
+     * @param level
+     */
     private static void printRecursive(ID3TreeNode tree, String base, int level) {
         level++;
         if(tree.attribute == null){
@@ -50,10 +86,5 @@ public class ID3TreeNode {
             String baseString = base + level + ":" + tree.attribute + "=" + child.getKey() + " ";
             printRecursive(child.getValue(), baseString , level);
         }
-    }
-
-    @Override
-    public String toString() {
-        return ID3TreeNode.printTree(this);
     }
 }

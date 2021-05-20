@@ -1,0 +1,4 @@
+A,B,C,F
+True,True,False,Maybe
+True,False,True,True
+False,True,False,Maybe
