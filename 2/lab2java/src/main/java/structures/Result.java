@@ -2,17 +2,35 @@ package structures;
 
 import java.util.LinkedHashSet;
 
+/**
+ * Class represents the result of resolution by negation algorithm.
+ */
 public class Result {
 
+    /**
+     * Describes if NIL has been proved, specifically, if negated goal clause has been disapproved.
+     */
     private boolean conclusion;
-    private String originalClausula;
-    private Clausula resultClausula;
-    private LinkedHashSet<Clausula> resultSos;
 
-    public Result(boolean conclusion, String originalClausula, Clausula resultClausula, LinkedHashSet<Clausula> linkedHashSet) {
+    /**
+     * Original clause that had to be approved.
+     */
+    private String originalClause;
+
+    /**
+     * NIL clause that has parent child tree structure.
+     */
+    private Clause resultClause;
+
+    /**
+     * Resulting SOS that contains all resolved clauses.
+     */
+    private LinkedHashSet<Clause> resultSos;
+
+    public Result(boolean conclusion, String originalClause, Clause resultClause, LinkedHashSet<Clause> linkedHashSet) {
         this.conclusion = conclusion;
-        this.originalClausula = originalClausula;
-        this.resultClausula = resultClausula;
+        this.originalClause = originalClause;
+        this.resultClause = resultClause;
         this.resultSos=linkedHashSet;
     }
 
@@ -24,20 +42,20 @@ public class Result {
         this.conclusion = conclusion;
     }
 
-    public String getOriginalClausula() {
-        return originalClausula;
+    public String getOriginalClause() {
+        return originalClause;
     }
 
-    public void setOriginalClausula(String originalClausula) {
-        this.originalClausula = originalClausula;
+    public void setOriginalClause(String originalClause) {
+        this.originalClause = originalClause;
     }
 
     @Override
     public String toString() {
         String output = "";
         if(!conclusion)
-            return "===============\n[CONCLUSION]: " + originalClausula + " is unknown";
-        output += Clausula.writeRecursive(resultClausula, resultSos) + "===============\n[CONCLUSION]: " + originalClausula + " is true";
+            return "[CONCLUSION]: " + originalClause + " is unknown";
+        output += Clause.writeRecursive(resultClause) + "===============\n[CONCLUSION]: " + originalClause + " is true";
         return output;
     }
 }

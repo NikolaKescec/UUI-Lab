@@ -1,79 +1,108 @@
 package algorithms;
 
-import structures.Clausula;
-import structures.ClausulaPair;
+import structures.Clause;
+import structures.ClausePair;
 import structures.Command;
 import structures.Result;
 
 import java.util.*;
 
+/**
+ * Class contains all algorithms and helper algorithms. Main algorithm is resolution algorithm.
+ */
 public class Algorithms {
 
-    public static Result resolutionAlgorithm(LinkedHashSet<Clausula> negatedProveClausulas,  LinkedHashSet<Clausula> clausulaList, Clausula originalClausula){
-        Clausula.resetStartingNumber();
-        printClausulas(clausulaList);
-        LinkedHashSet<Clausula> sos = new LinkedHashSet<>(negatedProveClausulas);
-        LinkedHashSet<Clausula> combinedSet = new LinkedHashSet<>(clausulaList);
+    /**
+     * This resolution algorithm is an implementation of resolution by negation.
+     * @param negatedGoalClause negated goal clause
+     * @param clauseList list of all clauses
+     * @param originalClause original goal clause (non negated)
+     * @return result
+     */
+    public static Result resolutionAlgorithm(LinkedHashSet<Clause> negatedGoalClause, LinkedHashSet<Clause> clauseList, Clause originalClause){
+        //RESETS THE CLAUSE NUMBERING
+        Clause.resetStartingNumber();
+        printClauses(clauseList);
+        LinkedHashSet<Clause> sos = new LinkedHashSet<>(negatedGoalClause);
+        LinkedHashSet<Clause> combinedSet = new LinkedHashSet<>(clauseList);
         HashMap<String, Set<String>> resolvedMaps = new HashMap<>();
         combinedSet.addAll(sos);
-        printClausulas(sos);
+        printClauses(sos);
         System.out.print("===============\n");
-        ClausulaPair pair;
+        ClausePair pair;
+        //While there are pairs that can be tested from combined and sos set, they are given to resolution algorithm
         while((pair = selectClauses(combinedSet, sos, resolvedMaps)) != null) {
-            String resolvent = resolve(pair.getFirstClausula(), pair.getSecondClausula());
+            //Resolves first clause and second clause
+            String resolvent = resolve(pair.getFirstClause(), pair.getSecondClause());
 
+            //IF new clause is NIL clause then resolution algorithm is finished
             if (resolvent.equals("NIL")) {
-                return new Result(true, originalClausula.getClausula(), new Clausula(resolvent, pair), sos);
+                return new Result(true, originalClause.getClause(), new Clause(resolvent, pair), sos);
             }
 
+            //Adds this new clause to combined set and SOS
             if(!resolvent.isEmpty()) {
-                if(StrategyAlgorihtms.addToClausulaSet(resolvent, sos, pair)) {
-                    for(Clausula clausula : sos) {
-                        StrategyAlgorihtms.removeAlreadyContained(clausula.getClausula(), combinedSet);
-                        combinedSet.add(clausula);
+                if(StrategyAlgorithms.addToClauseSet(resolvent, sos, pair)) {
+                    for(Clause clause : sos) {
+                        StrategyAlgorithms.removeAlreadyContained(clause.getClause(), combinedSet);
+                        combinedSet.add(clause);
                     }
                 }
             }
         }
-        return new Result(false, originalClausula.getClausula(), null, null);
+        //NIL clause has not been resolved, resolution algorithm is finished and goal clause is inconclusive.
+        return new Result(false, originalClause.getClause(), null, null);
     }
 
-
-
-    private static ClausulaPair selectClauses(LinkedHashSet<Clausula> combinedSet, LinkedHashSet<Clausula> sosSet, HashMap<String, Set<String>> testedPairs) {
-        for(Clausula first : combinedSet) {
-            for(Clausula second : sosSet) {
+    /**
+     * Selects a pair of clauses from given combined set and sos set.
+     * @param combinedSet set that contains all clauses, starting clauses and sos clauses
+     * @param sosSet sos set
+     * @param testedPairs map that for each clause has a set of strings that contains already tested clauses so they are ignored
+     * @return clause pair
+     */
+    private static ClausePair selectClauses(LinkedHashSet<Clause> combinedSet, LinkedHashSet<Clause> sosSet, HashMap<String, Set<String>> testedPairs) {
+        for(Clause first : combinedSet) {
+            for(Clause second : sosSet) {
                 if(first.equals(second))
                     continue;
 
-                if(testedPairs.get(first.getClausula()) != null && testedPairs.get(first.getClausula()).contains(second.getClausula()))
+                if(testedPairs.get(first.getClause()) != null && testedPairs.get(first.getClause()).contains(second.getClause()))
                     continue;
-                testedPairs.computeIfAbsent(first.getClausula(), k -> new HashSet<>());
-                testedPairs.get(first.getClausula()).add(second.getClausula());
+                testedPairs.computeIfAbsent(first.getClause(), k -> new HashSet<>());
+                testedPairs.get(first.getClause()).add(second.getClause());
 
-                return new ClausulaPair(first, second);
+                return new ClausePair(first, second);
             }
         }
         return null;
     }
 
-    private static String resolve(Clausula clausula, Clausula strategyClausula) {
+    /**
+     * Method which takes two clauses and then iterates trough both of clauses literals while searching for negations.
+     * If it finds such literals that they are negations of each other, then it resolves the clauses. Resolves FIRST OCCURRENCE.
+     * @param clause first clause
+     * @param strategyClause second clause
+     * @return a new resolved clause in string format
+     */
+    private static String resolve(Clause clause, Clause strategyClause) {
         LinkedHashSet<String> resolutions = new LinkedHashSet<>();
 
-        List<String> biggerClausula, smallerClausula;
-        if(clausula.getLiterals().size() > strategyClausula.getLiterals().size()) {
-            biggerClausula = new ArrayList<>(clausula.getLiterals());
-            smallerClausula = new ArrayList<>(strategyClausula.getLiterals());
+        // FIND A BIGGER CLAUSE
+        List<String> biggerClause, smallerClause;
+        if(clause.getLiterals().size() > strategyClause.getLiterals().size()) {
+            biggerClause = new ArrayList<>(clause.getLiterals());
+            smallerClause = new ArrayList<>(strategyClause.getLiterals());
         } else {
-            biggerClausula = new ArrayList<>(strategyClausula.getLiterals());
-            smallerClausula = new ArrayList<>(clausula.getLiterals());
+            biggerClause = new ArrayList<>(strategyClause.getLiterals());
+            smallerClause = new ArrayList<>(clause.getLiterals());
         }
 
-        Iterator<String> firstLiteralsIterator = biggerClausula.listIterator();
+        Iterator<String> firstLiteralsIterator = biggerClause.listIterator();
         boolean resolved = false;
         while(firstLiteralsIterator.hasNext()) {
             String literal = firstLiteralsIterator.next();
-            Iterator<String> secondLiteralIterator = smallerClausula.listIterator();
+            Iterator<String> secondLiteralIterator = smallerClause.listIterator();
             while(secondLiteralIterator.hasNext()) {
                 String otherLiteral = secondLiteralIterator.next();
                 if((literal.startsWith("~") && literal.substring(1).equals(otherLiteral))
@@ -89,48 +118,57 @@ public class Algorithms {
         }
 
         if(resolved) {
-            if(biggerClausula.isEmpty() && smallerClausula.isEmpty())
+            if(biggerClause.isEmpty() && smallerClause.isEmpty())
                 return "NIL";
 
-            List<String> newClausula = new ArrayList<>(biggerClausula);
-            newClausula.addAll(smallerClausula);
-            return String.join(" v ", newClausula);
+            List<String> newClause = new ArrayList<>(biggerClause);
+            newClause.addAll(smallerClause);
+            return String.join(" v ", newClause);
         }
 
         return "";
     }
 
-    public static void cookingAlgorithm(List<Command> commands, LinkedHashSet<Clausula> clausulaSet){
+    /**
+     * Implementation of cooking algorithm. Does a set of instructions depending on given command.
+     * @param commands list of commands that can be of TEST, ADD, REMOVE type.
+     * @param clauseSet given clause set with which cooking algorithm works.
+     */
+    public static void cookingAlgorithm(List<Command> commands, LinkedHashSet<Clause> clauseSet){
         for(Command command : commands) {
+            System.out.print("User's command: " + command + "\n");
             switch (command.getType()){
+                //CALLS resolution algorithm with negated command clause.
                 case TEST:
-                    System.out.println("User's command: " + command);
-                    System.out.println(resolutionAlgorithm(Clausula.negateClausula(command.getClausula().getClausula()), clausulaSet, command.getClausula()));
-                    System.out.println();
+                    System.out.println(resolutionAlgorithm(Clause.negateClause(command.getClause().getClause()), clauseSet, command.getClause()));
                     break;
+                //ADDS a new clause to the clause set.
                 case ADD:
-                    System.out.println("User's command: " + command);
-                    StrategyAlgorihtms.addToClausulaSet(command.getClausula().toString(), clausulaSet, null);
-                    System.out.println("Added " + command.getClausula().toString());
-                    System.out.println();
+                    StrategyAlgorithms.addToClauseSet(command.getClause().toString(), clauseSet, null);
+                    System.out.print("Added " + command.getClause().toString() + "\n");
                     break;
+                //REMOVES a clause from the clause set.
                 case REMOVE:
-                    System.out.println("User's command: " + command);
-                    clausulaSet.remove(command.getClausula());
-                    System.out.println("Removed " + command.getClausula().toString());
-                    System.out.println();
+                    clauseSet.remove(command.getClause());
+                    System.out.print("Removed " + command.getClause().toString() + "\n");
                     break;
                 default:
                     throw new IllegalArgumentException("No such command type!");
             }
+            System.out.print("\n");
         }
     }
 
-    public static void printClausulas(LinkedHashSet<Clausula> clausulas) {
-        for(Clausula clausula : clausulas) {
-            System.out.print(Clausula.getStartingClausulaNumber() + "." + " " + clausula.getClausula() + "\n");
-            clausula.setClausulaNumber(Clausula.getStartingClausulaNumber());
-            Clausula.incrementStartingNumber();
+    /**
+     * Helper method that writes out all clauses from given linked hash set and numerates them, while internally counting
+     * total number of clauses.
+     * @param clauses linked hash set of given clauses
+     */
+    public static void printClauses(LinkedHashSet<Clause> clauses) {
+        for(Clause clause : clauses) {
+            System.out.print(Clause.getStartingClauseNumber() + "." + " " + clause.getClause() + "\n");
+            clause.setClauseNumber(Clause.getStartingClauseNumber());
+            Clause.incrementStartingNumber();
         }
     }
 }

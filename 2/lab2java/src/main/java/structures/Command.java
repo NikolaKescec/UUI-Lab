@@ -1,21 +1,31 @@
 package structures;
 
+/**
+ * Class represents a command.
+ */
 public class Command {
 
-    private Clausula clausula;
+    /**
+     * Clause that command has to modify.
+     */
+    private Clause clause;
+
+    /**
+     * COmmand type.
+     */
     private CommandType type;
 
-    public Command(String clausulaCommand, CommandType type) {
-        this.clausula = new Clausula(clausulaCommand);
+    public Command(String clauseCommand, CommandType type) {
+        this.clause = new Clause(clauseCommand);
         this.type = type;
     }
 
-    public Clausula getClausula() {
-        return clausula;
+    public Clause getClause() {
+        return clause;
     }
 
-    public void setClausula(Clausula clausula) {
-        this.clausula = clausula;
+    public void setClause(Clause clause) {
+        this.clause = clause;
     }
 
     public CommandType getType() {
@@ -34,6 +44,6 @@ public class Command {
             case TEST: command = " ?"; break;
             case REMOVE: command = " -"; break;
         }
-        return clausula.toString() + command;
+        return clause.toString() + command;
     }
 }

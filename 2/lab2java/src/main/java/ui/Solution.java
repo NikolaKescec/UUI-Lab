@@ -2,8 +2,8 @@ package ui;
 
 import algorithms.AlgorithmType;
 import algorithms.Algorithms;
-import algorithms.StrategyAlgorihtms;
-import structures.Clausula;
+import algorithms.StrategyAlgorithms;
+import structures.Clause;
 import structures.Command;
 import structures.CommandType;
 
@@ -20,7 +20,7 @@ public class Solution {
 	public static void main(String ... args) {
 
 		AlgorithmType algorithmType = null;
-		Path clausulaList = null;
+		Path clauseList = null;
 		Path commandList = null;
 
 		if(args.length < 1)
@@ -32,15 +32,15 @@ public class Solution {
 			switch (args[0]) {
 				case "resolution":
 					if(args.length != 2)
-						throw new IllegalArgumentException("Resolution command needs only clausula list path!");
+						throw new IllegalArgumentException("Resolution command needs only clause list path!");
 					algorithmType = AlgorithmType.RESOLUTION;
-					clausulaList = Paths.get(args[1]);
+					clauseList = Paths.get(args[1]);
 					break;
 				case "cooking":
 					if(args.length != 3)
-						throw new IllegalArgumentException("Cooking command needs clausula list path and command list path!");
+						throw new IllegalArgumentException("Cooking command needs clause list path and command list path!");
 					algorithmType = AlgorithmType.COOKING;
-					clausulaList = Paths.get(args[1]);
+					clauseList = Paths.get(args[1]);
 					commandList = Paths.get(args[2]);
 					break;
 				default:
@@ -48,13 +48,13 @@ public class Solution {
 			}
 
 			// Variables declaration
-			List<String> clausulaStringList;
+			List<String> clauseStringList;
 			List<String> commandStringList = null;
 
-			if(clausulaList == null || !Files.exists(clausulaList) || !Files.isReadable(clausulaList))
-				throw new IllegalArgumentException("Please write correct clausula list file path.");
+			if(clauseList == null || !Files.exists(clauseList) || !Files.isReadable(clauseList))
+				throw new IllegalArgumentException("Please write correct clause list file path.");
 
-			clausulaStringList = Files.readAllLines(clausulaList).stream().filter(s -> !s.startsWith("#")).collect(Collectors.toList());
+			clauseStringList = Files.readAllLines(clauseList).stream().filter(s -> !s.startsWith("#")).collect(Collectors.toList());
 
 			if(algorithmType.equals(AlgorithmType.COOKING) && (commandList == null || !Files.exists(commandList) || !Files.isReadable(commandList)))
 				throw new IllegalArgumentException("When using cooking algorithm correct path to command list must be given!");
@@ -62,17 +62,19 @@ public class Solution {
 			if(algorithmType.equals(AlgorithmType.COOKING))
 				commandStringList =  Files.readAllLines(commandList).stream().filter(s -> !s.startsWith("#")).collect(Collectors.toList());
 
-			LinkedHashSet<Clausula> clausulasSet;
+			LinkedHashSet<Clause> clausesSet;
 			switch (algorithmType){
 				case RESOLUTION:
-					clausulasSet = getClausulas(clausulaStringList, false);
-					LinkedHashSet<Clausula> negatedSet = Clausula.negateClausula(clausulaStringList.get(clausulaStringList.size()-1));
-					System.out.println(Algorithms.resolutionAlgorithm(negatedSet, clausulasSet, new Clausula(clausulaStringList.get(clausulaStringList.size()-1))));
+					//DO NOT ADD ALL CLAUSES BECAUSE LAST CLAUSE IS NEGATED!
+					clausesSet = getClauses(clauseStringList, false);
+					LinkedHashSet<Clause> negatedSet = Clause.negateClause(clauseStringList.get(clauseStringList.size()-1));
+					System.out.println(Algorithms.resolutionAlgorithm(negatedSet, clausesSet, new Clause(clauseStringList.get(clauseStringList.size()-1))));
 					break;
 				case COOKING:
-					clausulasSet = getClausulas(clausulaStringList, true);
+					//ADD ALL CLAUSES!
+					clausesSet = getClauses(clauseStringList, true);
 					List<Command> commands = getCommands(commandStringList);
-					Algorithms.cookingAlgorithm(commands, clausulasSet);
+					Algorithms.cookingAlgorithm(commands, clausesSet);
 					break;
 				default:
 					throw new IllegalArgumentException("Invalid algorithm type!");
@@ -84,6 +86,11 @@ public class Solution {
 
 	}
 
+	/**
+	 * Method will get commands from command string list.
+	 * @param commandStringList command string list
+	 * @return list of commands
+	 */
 	private static List<Command> getCommands(List<String> commandStringList) {
 		List<Command> commands = new ArrayList<>();
 		for(String command : commandStringList) {
@@ -106,14 +113,20 @@ public class Solution {
 		return commands;
 	}
 
-	private static LinkedHashSet<Clausula> getClausulas(List<String> clausulaStringList, boolean complete) {
-		LinkedHashSet<Clausula> clausulas = new LinkedHashSet<>();
-		int size = complete ? clausulaStringList.size() : clausulaStringList.size()-1;
+	/**
+	 * Method will get clauses from clause string list.
+	 * @param clauseStringList clause string list
+	 * @param complete argument that, if true, will add all clauses from clause string list into output linked hash set
+	 * @return linked hash set
+	 */
+	private static LinkedHashSet<Clause> getClauses(List<String> clauseStringList, boolean complete) {
+		LinkedHashSet<Clause> clauses = new LinkedHashSet<>();
+		int size = complete ? clauseStringList.size() : clauseStringList.size()-1;
 		for(int i = 0; i < size; i++) {
-			String clausula = clausulaStringList.get(i);
-			StrategyAlgorihtms.addToClausulaSet(clausula, clausulas, null);
+			String clause = clauseStringList.get(i);
+			StrategyAlgorithms.addToClauseSet(clause, clauses, null);
 		}
-		return clausulas;
+		return clauses;
 	}
 
 }
